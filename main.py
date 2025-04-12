@@ -8,7 +8,8 @@ from app.utils.db import Base, engine
 from app import models
 from app.api.product_routes import product_router 
 from app.api.export_routes import export_router
-from app.api.admin_routes import admin_router
+from app.api.admin_page_routes import admin_page_router
+from app.api.admin_data_routes import admin_router
 
 app = FastAPI(
     title="Shopee 自動上架系統",
@@ -31,12 +32,13 @@ app.mount("/candidate_images", StaticFiles(directory=CANDIDATES_ROOT), name="sta
 
 
 app.mount("/js", StaticFiles(directory="app/static/js"), name="js")
-
+ 
 # === 模板引擎設定（Jinja2） ===
 templates = Jinja2Templates(directory="app/templates")
 
 app.include_router(product_router)
 app.include_router(export_router)
+app.include_router(admin_page_router)
 app.include_router(admin_router)
 
 # 自動建立資料表

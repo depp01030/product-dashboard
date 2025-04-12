@@ -1,0 +1,28 @@
+{# 📁 templates/admin/candidates_page.html #}
+{% extends "admin/base_list.html" %}
+
+{% block head %}
+<script type="module" src="{{ url_for('static', path='js/pages/candidates-page.js') }}"></script>
+{% endblock %}
+
+{% block filters %}
+<form id="filter-form" class="mb-3">
+  <input class="form-control mb-2" name="stall" id="filter-stall" placeholder="搜尋檔口">
+  <input class="form-control mb-2" name="name" id="filter-name" placeholder="商品名稱">
+  <select name="item_status" id="filter-status" class="form-select mb-2">
+    <option value="">全部狀態</option>
+    <option value="candidate" selected>候選</option>
+    <option value="product">已選</option>
+    <option value="ignore">忽略</option>
+  </select>
+  <button id="search-btn" class="btn btn-primary" type="button">查詢</button>
+</form>
+{% endblock %}
+
+{% block content %}
+<div id="item-count" class="text-muted mb-3"></div>
+<div class="row" id="product-list"></div>
+<div class="text-center mt-4">
+  <button id="load-more-btn" class="btn btn-outline-secondary">載入更多</button>
+</div>
+{% endblock %}

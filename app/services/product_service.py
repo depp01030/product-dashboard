@@ -42,9 +42,8 @@ def query_products_with_filters(
         query = query.filter(Product.stall_name.like(f"%{stall_keyword}%"))
 
     # 狀態（完全相等）
-    if params.status:
-        print(Product.item_status,params.status)
-        query = query.filter(Product.item_status == params.status)
+    if params.item_status: 
+        query = query.filter(Product.item_status == params.item_status)
 
     # ID（完全相等）
     if params.id:

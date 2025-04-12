@@ -1,5 +1,4 @@
-# app/routes/admin_routes.py
-
+# 📁 app/api/admin_data_routes.py
 from fastapi import APIRouter, Request, Depends, Form, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
@@ -18,39 +17,26 @@ from app.services.product_service import (
     update_product_by_dict,
     query_products_with_filters
 )
-from app.services.import_service import (
-    import_candidates_from_folder
-)
-from app.utils.image_tools import (
-    get_admin_product_image_info_list
-)
+from app.services.import_service import import_candidates_from_folder
+from app.utils.image_tools import get_admin_product_image_info_list
 
-admin_router = APIRouter(
-    prefix="/admin",
-    tags=["admin"]
-)
+admin_router = APIRouter(prefix="/admin", tags=["admin_data"])
 
+# === ✅ 匯入候選商品 ===
 @admin_router.post("/import-candidates")
 def trigger_import_candidates():
     count = import_candidates_from_folder()
     return {"message": f"成功匯入 {count} 筆資料"}
-# === 頁面：僅回傳 HTML 框架 ===
-@admin_router.get("/products", response_class=HTMLResponse)
-def show_product_list(request: Request):
-    return templates.TemplateResponse("admin/products.html", {
-        "request": request,
-        "candidate_images_prefix": "/candidate_images/",
-        "status_labels": STATUS_LABELS
-    })
 
-# === API：支援篩選 + 分頁 ===
-@admin_router.get("/api/products/search", response_model=List[ProductInDB])
+# === ✅ 查詢商品（可帶參數篩選） ===
+@admin_router.get("/api/products", response_model=List[ProductInDB])
 def get_product_list_with_filter(
-    db: Session = Depends(get_db), 
+    db: Session = Depends(get_db),
     params: ProductQueryParams = Depends(),
     offset: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100)
+    limit: int = Query(100, le=200)
 ):
+    print(params)
     products = query_products_with_filters(db, params, offset=offset, limit=limit)
 
     for p in products:
@@ -59,27 +45,12 @@ def get_product_list_with_filter(
 
     return products
 
-# === API：單純分頁（無篩選）===
-@admin_router.get("/api/products", response_model=List[ProductInDB])
-def get_product_list_json(
-    db: Session = Depends(get_db),
-    offset: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100)
-):
-    products = db.query(Product).order_by(Product.created_at.desc()).offset(offset).limit(limit).all()
-
-    for p in products:
-        p.selected_images = p.selected_images or []
-        p.image_list = get_admin_product_image_info_list(p.image_dir)
-
-    return products
-
-# === 更新商品資料 ===
+# === ✅ 提交商品編輯表單 ===
 @admin_router.post("/products/{product_id}/update")
 def update_product_from_admin(
     product_id: int,
     form: ProductUpdateForm = Depends(),
     db: Session = Depends(get_db)
-): 
+):
     update_product_by_dict(db, product_id, form.__dict__)
     return RedirectResponse(url="/admin/products", status_code=303)
