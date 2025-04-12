@@ -12,11 +12,11 @@ export function clearList(container) {
 }
 
 /**
- * 插入卡片到列表中，使用 Bootstrap row + col-md-6 排版
+ * 插入卡片到列表中，每張卡片占據整行
  */
 export function appendToList(container, card) {
   const wrapper = document.createElement("div");
-  wrapper.className = "col-md-6 mb-4";
+  wrapper.className = "col-12 mb-4"; // 改為 col-12 讓卡片占據整行
   wrapper.appendChild(card);
   container.appendChild(wrapper);
   totalCount += 1;

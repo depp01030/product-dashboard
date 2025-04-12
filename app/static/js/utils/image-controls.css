@@ -1,0 +1,169 @@
+.image-item {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.image-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+}
+
+.image-item img {
+  transition: transform 0.3s;
+}
+
+.image-item:hover img {
+  transform: scale(1.05);
+}
+
+/* 控制項停靠在頂部 */
+.image-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.image-item:hover .image-controls {
+  opacity: 1;
+}
+
+/* 美化按鈕組 */
+.image-controls .btn-group {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.image-controls .btn {
+  border: none;
+  padding: 4px 8px;
+  font-size: 0.875rem;
+}
+
+.image-controls .form-check-input {
+  margin: 0 4px 0 0;
+}
+
+/* 預覽圖片區域樣式 */
+.preview-image-wrapper {
+  position: relative;
+  transition: transform 0.2s;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.preview-image-wrapper:hover {
+  transform: translateY(-2px);
+}
+
+/* 選中和主圖的視覺效果 */
+.image-item.selected img {
+  border-color: #0d6efd;
+}
+
+.image-item.is-main img {
+  border-color: #198754;
+  border-width: 2px;
+}
+
+.image-item.selected {
+  border: 2px solid #0d6efd !important;
+}
+
+.image-item.is-main {
+  border: 2px solid #198754 !important;
+}
+
+/* 美化表單控制項 */
+.form-control.bg-light:focus,
+.form-select.bg-light:focus {
+  background-color: #fff !important;
+  box-shadow: none;
+  border-color: #0d6efd;
+}
+
+.form-control.border-0:focus,
+.form-select.border-0:focus {
+  box-shadow: none;
+  border: 1px solid #0d6efd;
+}
+
+/* Badge 樣式 */
+.badge {
+  padding: 0.5em 0.8em;
+  font-weight: 500;
+}
+
+/* 按鈕效果 */
+.btn-light {
+  background-color: #f8f9fa;
+  border-color: #f8f9fa;
+}
+
+.btn-light:hover {
+  background-color: #e9ecef;
+  border-color: #e9ecef;
+}
+
+/* 分隔線效果 */
+.border-bottom {
+  border-bottom-color: #f1f1f1 !important;
+}
+
+/* 圖片網格容器 */
+.image-module .collapse {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* 美化滾動條 */
+.image-module .collapse::-webkit-scrollbar {
+  width: 6px;
+}
+
+.image-module .collapse::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.image-module .collapse::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.image-module .collapse::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* 卡片間距和分隔效果 */
+.card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-bottom: 2rem !important;
+  border-radius: 8px !important;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.card .border-top {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.card:hover .border-top {
+  opacity: 1;
+}
+
+/* 圖片網格布局 */
+.image-module .row {
+  --bs-gutter-x: 1rem;
+  --bs-gutter-y: 1rem;
+}
