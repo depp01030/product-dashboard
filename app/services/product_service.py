@@ -1,0 +1,96 @@
+# app/services/product_service.py
+
+from sqlalchemy.orm import Session
+from app.models.product import Product
+from app.schemas.product import ProductCreate, ProductInDB
+from app.schemas.product_query import ProductQueryParams
+from typing import Optional, List
+# === 建立商品 ===
+def create_product(db: Session, product_data: ProductCreate) -> Product:
+    db_product = Product(**product_data.model_dump())
+    db.add(db_product)
+    db.commit()
+    db.refresh(db_product)
+    return db_product
+
+# === 取得所有商品 ===
+def get_all_products(db: Session):
+    return db.query(Product).all()
+
+# === 取得單一商品 ===
+def get_product(db: Session, product_id: int):
+    return db.query(Product).filter(Product.id == product_id).first()
+
+# app/services/product_service.py
+ 
+
+def query_products_with_filters(
+    db: Session,
+    params: ProductQueryParams,
+    offset: int = 0,
+    limit: Optional[int] = None
+) -> List[Product]:
+    query = db.query(Product)
+
+    # 起始時間（created_at）
+    if params.from_date:
+        query = query.filter(Product.created_at >= params.from_date)
+
+    # 檔口模糊比對（支援 * 通配）
+    if params.stall:
+        stall_keyword = params.stall.replace("*", "%")
+        query = query.filter(Product.stall_name.like(f"%{stall_keyword}%"))
+
+    # 狀態（完全相等）
+    if params.status:
+        print(Product.item_status,params.status)
+        query = query.filter(Product.item_status == params.status)
+
+    # ID（完全相等）
+    if params.id:
+        query = query.filter(Product.id == params.id)
+
+    # 商品名稱模糊比對（支援 * 通配）
+    if params.name:
+        name_keyword = params.name.replace("*", "%")
+        query = query.filter(Product.name.like(f"%{name_keyword}%"))
+
+    # 排序
+    query = query.order_by(Product.created_at.desc())
+
+    # 分頁（可選）
+    if limit is not None:
+        query = query.offset(offset).limit(limit)
+
+    return query.all()
+
+# === 更新商品 ===
+def update_product_by_dict(db: Session, product_id: int, update_data: dict):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        return None
+    for key, value in update_data.items():
+        if isinstance(value, str) and value.strip().lower() == "none":
+            value = None
+        setattr(product, key, value)
+    db.commit()
+    db.refresh(product)
+    return product
+def update_product(db: Session, product_id: int, update_data: ProductCreate):
+    product = get_product(db, product_id)
+    if product is None:
+        return None
+    for key, value in update_data.model_dump().items():
+        setattr(product, key, value)
+    db.commit()
+    db.refresh(product)
+    return product
+
+# === 刪除商品 ===
+def delete_product(db: Session, product_id: int):
+    product = get_product(db, product_id)
+    if product is None:
+        return None
+    db.delete(product)
+    db.commit()
+    return product

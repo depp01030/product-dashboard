@@ -1,0 +1,28 @@
+# === 資料處理 & 匯入 ===
+pandas==2.1.4
+openpyxl==3.1.2
+
+# === MySQL 資料庫連線 ===
+mysql-connector-python==8.3.0
+
+# === 環境變數管理（例如 DB 密碼）===
+python-dotenv==1.0.1
+
+# === Shopee API 呼叫 ===
+requests==2.31.0
+
+# === Web API 框架（FastAPI）===
+fastapi==0.110.0
+uvicorn==0.29.0
+python-multipart==0.0.9
+
+# === ORM（SQLAlchemy）===
+SQLAlchemy==2.0.25
+
+# === 圖片處理 & 上傳擴展 ===
+Pillow==10.2.0
+boto3==1.34.79
+# minio==7.2.5          # 可選：私有物件儲存 MinIO
+
+# === GPT 輔助（未來整合 GPT-4o 時用） ===
+openai==1.14.3
