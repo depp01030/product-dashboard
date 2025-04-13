@@ -12,3 +12,5 @@ def get_database_uri():
 
 def get_candidates_root() -> str:
     return os.getenv("CANDIDATES_ROOT", "./Candidates_root")
+def get_products_root() -> str:
+    return os.getenv("PRODUCTS_ROOT", "./products_root")

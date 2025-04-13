@@ -22,11 +22,11 @@ from app.utils.image_tools import get_admin_product_image_info_list
 
 admin_router = APIRouter(prefix="/admin", tags=["admin_data"])
 
-# === ✅ 匯入候選商品 ===
-@admin_router.post("/import-candidates")
-def trigger_import_candidates():
-    count = import_candidates_from_folder()
-    return {"message": f"成功匯入 {count} 筆資料"}
+# # === ✅ 匯入候選商品 ===
+# @admin_router.post("/import-candidates")
+# def trigger_import_candidates():
+#     count = import_candidates_from_folder()
+#     return {"message": f"成功匯入 {count} 筆資料"}
 
 # === ✅ 查詢商品（可帶參數篩選） ===
 @admin_router.get("/api/products", response_model=List[ProductInDB])
@@ -39,9 +39,8 @@ def get_product_list_with_filter(
     print(params)
     products = query_products_with_filters(db, params, offset=offset, limit=limit)
 
-    for p in products:
-        p.selected_images = p.selected_images or []
-        p.image_list = get_admin_product_image_info_list(p.image_dir)
+    for p in products: 
+        p.image_list = get_admin_product_image_info_list(p.item_folder)
 
     return products
 

@@ -20,7 +20,7 @@ class Product(Base):
     stall_name = Column(String(100), nullable=True)         # 檔口名稱
     source = Column(String(255), nullable=True)             # 來源
     item_status = Column(SQLEnum(ItemStatusEnum), 
-                         default=ItemStatusEnum.candidate, nullable=False)  # 商品狀態
+                         default=ItemStatusEnum.product, nullable=False)  # 商品狀態
     
 
     # === 類別與規格資訊 ===
@@ -32,9 +32,8 @@ class Product(Base):
     real_stock = Column(Integer, nullable=True)                # 真實庫存
 
     # === 圖片管理 ===
-    image_dir = Column(String(255))                         # 相對資料夾路徑（例如：A001/001_涼感褲）
-    selected_images = Column(JSON, nullable=True)           # 勾選要用的圖片清單
-    main_image = Column(String(255), nullable=True)         # 主圖片檔名（例如：1.jpg）
+    item_folder = Column(String(255))                        # 相對資料夾路徑(產品主資料夾）（例如：A001/001_涼感褲）
+    main_image = Column(String(255), nullable=True)          # 主圖片檔名（例如：1.jpg）
 
     # === 商品分類與設定 ===
     shopee_category_id = Column(Integer, nullable=True)     # Shopee 類別 ID（純數字）

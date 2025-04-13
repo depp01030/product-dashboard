@@ -32,6 +32,5 @@ class ProductUpdateForm:
         self.real_stock = real_stock
         self.custom_type = custom_type
         self.colors = [c.strip() for c in colors.split(",") if c.strip()]
-        self.sizes = [s.strip() for s in sizes.split(",") if s.strip()]
-        self.selected_images = [i.strip() for i in selected_images.split(",") if i.strip()]
+        self.sizes = [s.strip() for s in sizes.split(",") if s.strip()] 
         self.main_image = main_image

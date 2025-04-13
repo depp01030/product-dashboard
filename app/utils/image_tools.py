@@ -5,13 +5,14 @@ from pathlib import Path
 from typing import List, Optional
 from PIL import Image
 import io
-from app.utils.config import get_candidates_root
+from app.utils.config import get_candidates_root, get_products_root
 from app.models.product import Product
 from app.utils.config import load_env 
 
 load_env()
 
 CANDIDATES_ROOT = os.getenv("CANDIDATES_ROOT")
+PRODUCTS_ROOT = os.getenv("PRODUCTS_ROOT")
 
 def get_thumbs_path(image_path: str) -> str:
     """
@@ -64,12 +65,12 @@ def get_image_url(image_dir: str, filename: str, use_compressed: bool = True) ->
     """
     獲取圖片URL。如果指定使用壓縮版本，會按需進行壓縮。
     """
-    abs_path = os.path.join(CANDIDATES_ROOT, image_dir, filename)
+    abs_path = os.path.join(PRODUCTS_ROOT, image_dir, filename)
     
     if use_compressed:
         # 確保有壓縮版本可用
         actual_path = ensure_compressed(abs_path)
-        rel_path = os.path.relpath(actual_path, CANDIDATES_ROOT)
+        rel_path = os.path.relpath(actual_path, PRODUCTS_ROOT)
     else:
         # 使用原圖
         rel_path = os.path.join(image_dir, filename)
@@ -81,7 +82,7 @@ def _get_sorted_images(image_dir: str) -> List[str]:
     '''
     image_dir = "bronze/9 高品質內磨毛水洗牛仔褲 SM 1194 1780"
     '''
-    abs_path = os.path.join(CANDIDATES_ROOT, image_dir)
+    abs_path = os.path.join(PRODUCTS_ROOT, image_dir)
     if not os.path.isdir(abs_path):
         return []
     return sorted(
@@ -124,7 +125,7 @@ def get_product_images(product: Product) -> List[str]:
     """
     傳回指定 product 對應的所有圖片絕對路徑
     """
-    root = Path(get_candidates_root())
+    root = Path(get_products_root())
     folder = root / product.image_dir
 
     if not folder.exists() or not folder.is_dir():
@@ -151,11 +152,11 @@ def get_images_url(image_dir: str, limit: int = 9) -> List[str]:
     
     result = []
     for filename in files:
-        abs_path = os.path.join(CANDIDATES_ROOT, image_dir, filename)
+        abs_path = os.path.join(PRODUCTS_ROOT, image_dir, filename)
         
         # 獲取實際使用的圖片路徑（按需壓縮）
         actual_path = ensure_compressed(abs_path) if use_url else abs_path
-        rel_path = os.path.relpath(actual_path, CANDIDATES_ROOT)
+        rel_path = os.path.relpath(actual_path, PRODUCTS_ROOT)
         rel_path = rel_path.replace("\\", "/")
         
         if use_url:

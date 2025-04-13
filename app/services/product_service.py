@@ -80,7 +80,7 @@ def update_product_by_dict(db: Session, product_id: int, update_data: dict):
                         value = '{}'
                 except json.JSONDecodeError:
                     value = '{}'
-        elif key in ['colors', 'sizes', 'selected_images', 'logistics_options']:
+        elif key in ['colors', 'sizes', 'logistics_options']:
             # 處理其他 JSON 列表欄位
             if isinstance(value, (list, dict)):
                 value = json.dumps(value)
