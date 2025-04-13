@@ -1,10 +1,10 @@
-# app/services/product_service.py
-
+import json
 from sqlalchemy.orm import Session
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductInDB
 from app.schemas.product_query import ProductQueryParams
 from typing import Optional, List
+
 # === 建立商品 ===
 def create_product(db: Session, product_data: ProductCreate) -> Product:
     db_product = Product(**product_data.model_dump())
@@ -22,7 +22,6 @@ def get_product(db: Session, product_id: int):
     return db.query(Product).filter(Product.id == product_id).first()
 
 # app/services/product_service.py
- 
 
 def query_products_with_filters(
     db: Session,
@@ -68,13 +67,37 @@ def update_product_by_dict(db: Session, product_id: int, update_data: dict):
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         return None
+        
     for key, value in update_data.items():
-        if isinstance(value, str) and value.strip().lower() == "none":
+        if key == 'size_metrics':
+            # 特殊處理 size_metrics，確保它是一個有效的 JSON 字典
+            if isinstance(value, dict):
+                value = json.dumps(value)
+            elif isinstance(value, str):
+                try:
+                    parsed = json.loads(value)
+                    if not isinstance(parsed, dict):
+                        value = '{}'
+                except json.JSONDecodeError:
+                    value = '{}'
+        elif key in ['colors', 'sizes', 'selected_images', 'logistics_options']:
+            # 處理其他 JSON 列表欄位
+            if isinstance(value, (list, dict)):
+                value = json.dumps(value)
+            elif isinstance(value, str):
+                try:
+                    json.loads(value)  # 驗證 JSON 格式
+                except json.JSONDecodeError:
+                    value = '[]'
+        elif isinstance(value, str) and value.strip().lower() == "none":
             value = None
+            
         setattr(product, key, value)
+        
     db.commit()
     db.refresh(product)
     return product
+
 def update_product(db: Session, product_id: int, update_data: ProductCreate):
     product = get_product(db, product_id)
     if product is None:

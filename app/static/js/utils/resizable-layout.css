@@ -1,0 +1,57 @@
+.resizable-container {
+  display: flex;
+  position: relative;
+  width: 100%;
+}
+
+.resizable-left {
+  flex: 0 0 66.666667%;
+  transition: flex-basis 0.2s;
+  min-width: 300px;
+  max-width: 85%;
+}
+
+.resizable-right {
+  flex: 1;
+  transition: flex-basis 0.2s;
+  min-width: 200px;
+}
+
+.resizable-splitter {
+  width: 8px;
+  background: #f8f9fa;
+  cursor: col-resize;
+  margin: 0 -4px;
+  position: relative;
+  z-index: 10;
+  transition: background-color 0.2s;
+}
+
+.resizable-splitter:hover,
+.resizable-splitter.dragging {
+  background: #dee2e6;
+}
+
+.resizable-splitter::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 2rem;
+  background: #adb5bd;
+  border-radius: 1px;
+}
+
+/* 圖片大小隨右側欄位寬度調整 */
+.resizable-right .preview-image-wrapper img {
+  width: 100%;
+  height: auto;
+  transition: width 0.2s, height 0.2s;
+}
+
+/* 拖曳時禁用文字選取 */
+.user-select-none {
+  user-select: none;
+}

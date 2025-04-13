@@ -3,7 +3,7 @@
 from sqlalchemy import Column, Integer, String, Text, DECIMAL, DateTime, JSON
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.sql import func
-from app.models.enums import ItemStatusEnum, LogisticsOptionEnum, CustomTypeEnum
+from app.models.enums import ItemStatusEnum, LogisticsOptionEnum, CustomTypeEnum, SizeMetricsEnum
 from app.utils.db import Base
 
 
@@ -18,20 +18,21 @@ class Product(Base):
     description = Column(Text, nullable=True)               # 商品描述
     price = Column(DECIMAL(10, 2), nullable=True)           # 價格 
     stall_name = Column(String(100), nullable=True)         # 檔口名稱
+    source = Column(String(255), nullable=True)             # 來源
     item_status = Column(SQLEnum(ItemStatusEnum), 
                          default=ItemStatusEnum.candidate, nullable=False)  # 商品狀態
     
 
-    # === 額外資訊 ===
+    # === 類別與規格資訊 ===
     custom_type = Column(SQLEnum(CustomTypeEnum),
                         nullable=True)                         # 自定分類（例如：洋裝）
     material = Column(String(255), nullable=True)              # 材質
-    size_note = Column(Text, nullable=True)                    # 尺寸描述
+    size_metrics = Column(JSON, nullable=True)                 # 尺寸資訊 {"shoulder": "40", "length": "65"}
+    size_note = Column(Text, nullable=True)                    # 尺寸額外描述
     real_stock = Column(Integer, nullable=True)                # 真實庫存
 
     # === 圖片管理 ===
     image_dir = Column(String(255))                         # 相對資料夾路徑（例如：A001/001_涼感褲）
-    # === 圖片標註 ===
     selected_images = Column(JSON, nullable=True)           # 勾選要用的圖片清單
     main_image = Column(String(255), nullable=True)         # 主圖片檔名（例如：1.jpg）
 

@@ -8,10 +8,14 @@ initProductPage({
   loadMoreBtnId: "load-more-btn",
   showFields: [
     "stall_name",
+    "source",
     "name",
     "description",
+    "custom_type",
+    "material",
     "price",
-    "stock",
+    "colors",
+    "sizes",
     "item_status"
   ],
   submitPath: "/admin/products",

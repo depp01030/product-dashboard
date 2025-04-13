@@ -1,5 +1,40 @@
 // 📁 static/js/utils/render-card.js
 import { renderImageModule } from "./render-image-module.js";
+import { initResizable } from "./resizable-layout.js";
+
+const CUSTOM_TYPE_OPTIONS = {
+  top: "女性上著",
+  bottom: "女性下著",
+  dress: "洋裝",
+  coat: "外套",
+  skirt: "裙子",
+  pants: "褲子",
+  accessories: "配飾",
+  scarf: "圍巾",
+  other: "其他"
+};
+
+const SIZE_METRICS_BY_TYPE = {
+  top: ["shoulder", "bust", "length", "sleeve"],
+  bottom: ["waist", "hip", "length", "inseam"],
+  dress: ["shoulder", "bust", "waist", "length"],
+  coat: ["shoulder", "bust", "length", "sleeve"],
+  skirt: ["waist", "hip", "length"],
+  pants: ["waist", "hip", "length", "inseam"],
+  accessories: [],
+  scarf: ["length"],
+  other: []
+};
+
+const SIZE_METRIC_LABELS = {
+  shoulder: "肩寬",
+  bust: "胸圍",
+  waist: "腰圍",
+  hip: "臀圍",
+  length: "衣長",
+  sleeve: "袖長",
+  inseam: "內檔長"
+};
 
 export function renderProductCard(product, options = {}) {
   const {
@@ -37,6 +72,13 @@ export function renderProductCard(product, options = {}) {
                  style="width: 120px" value="${product.stall_name || ""}">
         </div>
       ` : ""}
+      ${showFields.includes("source") ? `
+        <div class="d-flex align-items-center">
+          <label class="form-label mb-0 me-2 text-muted">來源</label>
+          <input name="source" class="form-control form-control-sm border-0 bg-light" 
+                 style="width: 120px" value="${product.source || ""}">
+        </div>
+      ` : ""}
     </div>
     <div class="d-flex gap-2">
       <button type="submit" class="btn btn-primary btn-sm px-3">儲存</button>
@@ -59,11 +101,11 @@ export function renderProductCard(product, options = {}) {
 
   // === 主要內容區域 ===
   const contentContainer = document.createElement("div");
-  contentContainer.className = "row g-4"; // 增加列間距
+  contentContainer.className = "resizable-container"; // 改用resizable布局
 
   // === 左側區域 ===
   const colLeft = document.createElement("div");
-  colLeft.className = "col-8";
+  colLeft.className = "resizable-left";  // 改用resizable布局
 
   // --- 左側上方：預覽圖 ---
   const previewSection = document.createElement("div");
@@ -85,6 +127,48 @@ export function renderProductCard(product, options = {}) {
   // --- 左側下方：其他信息 ---
   const infoSection = document.createElement("div");
   infoSection.className = "bg-light rounded-3 p-3";  // 添加背景色和圓角
+  
+  // 商品類別選擇（影響尺寸欄位）
+  const customTypeSelect = `
+    <div class="mb-3">
+      <label class="form-label text-muted small">商品類別</label>
+      <select name="custom_type" class="form-select border-0 bg-white" 
+              onchange="updateSizeMetrics(this)">
+        <option value="">請選擇</option>
+        ${Object.entries(CUSTOM_TYPE_OPTIONS).map(([value, label]) => `
+          <option value="${value}" ${product.custom_type === value ? 'selected' : ''}>
+            ${label}
+          </option>
+        `).join('')}
+      </select>
+    </div>
+  `;
+
+  // 準備尺寸資訊
+  const currentMetrics = product.size_metrics || {};
+  const currentType = product.custom_type || '';
+  const metricsToShow = SIZE_METRICS_BY_TYPE[currentType] || [];
+  
+  const sizeMetricsHtml = metricsToShow.length ? `
+    <div class="mb-3">
+      <label class="form-label text-muted small">尺寸資訊</label>
+      <div class="row g-2">
+        ${metricsToShow.map(metric => `
+          <div class="col-6 col-md-3">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text border-0 bg-white">${SIZE_METRIC_LABELS[metric]}</span>
+              <input type="text" 
+                     class="form-control border-0 bg-white" 
+                     name="size_metrics_${metric}"
+                     value="${currentMetrics[metric] || ''}"
+                     placeholder="cm">
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
   infoSection.innerHTML = `
     ${showFields.includes("description") ? `
       <div class="mb-3">
@@ -93,16 +177,48 @@ export function renderProductCard(product, options = {}) {
                   placeholder="請輸入商品描述...">${product.description || ""}</textarea>
       </div>
     ` : ""}
+    
+    ${customTypeSelect}
+    ${sizeMetricsHtml}
+    
     <div class="row g-3">
       ${showFields.includes("price") ? `
         <div class="col-6">
           <label class="form-label text-muted small">價格</label>
           <div class="input-group">
             <span class="input-group-text border-0 bg-white">NT$</span>
-            <input name="price" type="number" class="form-control border-0 bg-white" value="${product.price || ""}">
+            <input name="price" type="number" class="form-control border-0 bg-white" 
+                   value="${product.price || ""}">
           </div>
         </div>
       ` : ""}
+      
+      ${showFields.includes("material") ? `
+        <div class="col-6">
+          <label class="form-label text-muted small">材質</label>
+          <input name="material" class="form-control border-0 bg-white" 
+                 value="${product.material || ""}">
+        </div>
+      ` : ""}
+      
+      ${showFields.includes("colors") ? `
+        <div class="col-6">
+          <label class="form-label text-muted small">顏色</label>
+          <input name="colors" class="form-control border-0 bg-white" 
+                 value="${(product.colors || []).join(", ")}"
+                 placeholder="以逗號分隔">
+        </div>
+      ` : ""}
+      
+      ${showFields.includes("sizes") ? `
+        <div class="col-6">
+          <label class="form-label text-muted small">尺寸</label>
+          <input name="sizes" class="form-control border-0 bg-white" 
+                 value="${(product.sizes || []).join(", ")}"
+                 placeholder="以逗號分隔">
+        </div>
+      ` : ""}
+      
       ${showFields.includes("stock") ? `
         <div class="col-6">
           <label class="form-label text-muted small">庫存</label>
@@ -132,16 +248,26 @@ export function renderProductCard(product, options = {}) {
     : ""}
   `;
   colLeft.appendChild(infoSection);
-  contentContainer.appendChild(colLeft);
 
-  // === 右側：圖片模組 ===
+  // === 分隔條 ===
+  const splitter = document.createElement("div");
+  splitter.className = "resizable-splitter";
+  
+  // === 右側區域 ===
   const colRight = document.createElement("div");
-  colRight.className = "col-4 border-start";
+  colRight.className = "resizable-right";  // 改用resizable布局
   colRight.appendChild(renderImageModule(product));
+
+  // 組裝resizable布局
+  contentContainer.appendChild(colLeft);
+  contentContainer.appendChild(splitter);
   contentContainer.appendChild(colRight);
 
   cardBody.appendChild(contentContainer);
   form.appendChild(cardBody);
+
+  // 初始化resizable功能
+  initResizable(contentContainer);
 
   // === 表單提交處理 ===
   form.addEventListener("submit", async e => {
@@ -158,6 +284,17 @@ export function renderProductCard(product, options = {}) {
       selectedImages.push(checkbox.value);
     });
     formData.set("selected_images", selectedImages.join(","));
+
+    // 收集尺寸資訊
+    const sizeMetrics = {};
+    const type = formData.get("custom_type");
+    if (type && SIZE_METRICS_BY_TYPE[type]) {
+      SIZE_METRICS_BY_TYPE[type].forEach(metric => {
+        const value = formData.get(`size_metrics_${metric}`);
+        if (value) sizeMetrics[metric] = value;
+      });
+    }
+    formData.set("size_metrics", JSON.stringify(sizeMetrics));
 
     const button = form.querySelector("button[type=submit]");
     button.disabled = true;

@@ -8,8 +8,10 @@ class ProductUpdateForm:
         description: str = Form(None),
         price: float = Form(None),
         stall_name: Optional[str] = Form(None),
+        source: Optional[str] = Form(None),
         item_status: Optional[str] = Form(None),
         material: Optional[str] = Form(None),
+        size_metrics: Optional[str] = Form("{}"),  # JSON string
         size_note: Optional[str] = Form(None),
         real_stock: Optional[int] = Form(None),
         custom_type: Optional[str] = Form(None),
@@ -22,8 +24,10 @@ class ProductUpdateForm:
         self.description = description
         self.price = price
         self.stall_name = stall_name
+        self.source = source
         self.item_status = item_status
         self.material = material
+        self.size_metrics = size_metrics  # Will be parsed as JSON in service
         self.size_note = size_note
         self.real_stock = real_stock
         self.custom_type = custom_type
