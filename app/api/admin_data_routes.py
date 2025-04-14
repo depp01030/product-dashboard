@@ -34,8 +34,7 @@ def get_product_list_with_filter(
     params: ProductQuery = Depends(),
     offset: int = Query(0, ge=0),
     limit: int = Query(100, le=200)
-):
-    print(params)
+): 
     products = query_products_with_filters(db, params, offset=offset, limit=limit)
 
     for p in products: 

@@ -4,11 +4,12 @@ from fastapi import Form
 class ProductUpdateForm:
     def __init__(
         self,
-        name: str = Form(...),
+        name: str = Form(None),
         description: str = Form(None),
         price: float = Form(None),
         stall_name: Optional[str] = Form(None),
         source: Optional[str] = Form(None),
+        source_url: Optional[str] = Form(None),
         item_status: Optional[str] = Form(None),
         material: Optional[str] = Form(None),
         size_metrics: Optional[str] = Form("{}"),  # JSON string
@@ -17,7 +18,6 @@ class ProductUpdateForm:
         custom_type: Optional[str] = Form(None),
         colors: Optional[str] = Form(""),
         sizes: Optional[str] = Form(""),
-        selected_images: Optional[str] = Form(""),
         main_image: Optional[str] = Form(None)
     ):
         self.name = name
@@ -25,6 +25,7 @@ class ProductUpdateForm:
         self.price = price
         self.stall_name = stall_name
         self.source = source
+        self.source_url = source_url
         self.item_status = item_status
         self.material = material
         self.size_metrics = size_metrics  # Will be parsed as JSON in service

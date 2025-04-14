@@ -46,6 +46,9 @@ def query_products_with_filters(
     # ID（完全相等）
     if params.id:
         query = query.filter(Product.id == params.id)
+    # website (完全相等）
+    if params.source_url:
+        query = query.filter(Product.source_url == params.source_url)
 
     # 商品名稱模糊比對（支援 * 通配）
     if params.name:

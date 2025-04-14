@@ -12,6 +12,7 @@ class ProductBase(BaseModel):
     price: Optional[float] = None
     stall_name: Optional[str] = None
     source: Optional[str] = None
+    source_url: Optional[str] = None
 
     # === 額外資訊 ===
     custom_type: Optional[str] = None          
@@ -71,7 +72,7 @@ class ProductQuery(ProductBase):
     item_status: Optional[str] = Field(None, description="商品狀態 (candidate/product/ignore)")
     stall: Optional[str] = Field(None, description="檔口名稱模糊比對")
     from_date: Optional[date] = Field(None, description="從此日期開始建立的商品")
-
+    source_url: Optional[str] = Field(None, description="網站名稱模糊比對")
 class ProductCreate(ProductBase):
     pass
 

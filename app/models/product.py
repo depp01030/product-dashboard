@@ -19,6 +19,7 @@ class Product(Base):
     price = Column(DECIMAL(10, 2), nullable=True)           # 價格 
     stall_name = Column(String(100), nullable=True)         # 檔口名稱
     source = Column(String(255), nullable=True)             # 來源
+    source_url = Column(String(255), nullable=True)            # 網站連結
     item_status = Column(SQLEnum(ItemStatusEnum), 
                          default=ItemStatusEnum.product, nullable=False)  # 商品狀態
     
