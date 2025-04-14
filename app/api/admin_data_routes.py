@@ -10,11 +10,10 @@ from app.utils.template_engine import templates
 from app.constants.status_labels import STATUS_LABELS
 
 from app.models.product import Product
-from app.schemas.product import ProductInDB
-from app.schemas.product_update_form import ProductUpdateForm
-from app.schemas.product_query import ProductQueryParams
+from app.schemas.product import ProductInDB, ProductUpdate, ProductCreate, ProductQuery
+from app.schemas.product_update_form import ProductUpdateForm 
 from app.services.product_service import (
-    update_product_by_dict,
+    update_product,
     query_products_with_filters
 )
 from app.services.import_service import import_candidates_from_folder
@@ -32,7 +31,7 @@ admin_router = APIRouter(prefix="/admin", tags=["admin_data"])
 @admin_router.get("/api/products", response_model=List[ProductInDB])
 def get_product_list_with_filter(
     db: Session = Depends(get_db),
-    params: ProductQueryParams = Depends(),
+    params: ProductQuery = Depends(),
     offset: int = Query(0, ge=0),
     limit: int = Query(100, le=200)
 ):
@@ -51,5 +50,6 @@ def update_product_from_admin(
     form: ProductUpdateForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    update_product_by_dict(db, product_id, form.__dict__)
+    product = ProductUpdate(**form.__dict__)
+    update_product(db, product_id, product)
     return RedirectResponse(url="/admin/products", status_code=303)

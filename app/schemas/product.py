@@ -1,8 +1,8 @@
 # app/schemas/product.py
 
 from typing import Optional, List, Dict, Any, Union
-from pydantic import BaseModel, field_validator
-from datetime import datetime
+from pydantic import BaseModel, Field, field_validator
+from datetime import datetime, date
 import json
 
 class ProductBase(BaseModel):
@@ -65,9 +65,18 @@ class ProductBase(BaseModel):
                 return []
         return []
 
+class ProductQuery(ProductBase):
+    id: Optional[int] = Field(None, description="商品 ID 精準比對")
+    name: Optional[str] = Field(None, description="商品名稱模糊比對")
+    item_status: Optional[str] = Field(None, description="商品狀態 (candidate/product/ignore)")
+    stall: Optional[str] = Field(None, description="檔口名稱模糊比對")
+    from_date: Optional[date] = Field(None, description="從此日期開始建立的商品")
+
 class ProductCreate(ProductBase):
     pass
 
+class ProductUpdate(ProductBase):
+    pass
 class ProductInDB(ProductBase):
     id: int 
     image_list: Optional[List[dict]] = []

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.utils.db import SessionLocal
-from app.schemas.product import ProductCreate, ProductInDB
+from app.schemas.product import ProductCreate, ProductUpdate, ProductInDB
 from app.services.product_service import (
     create_product, get_all_products, get_product,
     update_product, delete_product
@@ -26,7 +26,7 @@ def get_db():
         db.close()
 
 # === 建立商品 ===
-@product_router.post("/", response_model=ProductInDB)
+@product_router.post("/create", response_model=ProductInDB)
 def create(product: ProductCreate, db: Session = Depends(get_db)):
     return create_product(db, product)
 
@@ -43,7 +43,7 @@ def read_one(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Product not found")
     return product
 
-# === 預覽圖片清單（回傳本機圖片路徑清單） ===
+# === 預覽圖片清單（回傳本機圖片路徑清單）=== 
 @product_router.get("/{product_id}/images", response_model=List[str])
 def preview_images(product_id: int, db: Session = Depends(get_db)):
     product = get_product(db, product_id)
@@ -55,7 +55,7 @@ def preview_images(product_id: int, db: Session = Depends(get_db)):
 
 # === 更新商品 ===
 @product_router.put("/{product_id}", response_model=ProductInDB)
-def update(product_id: int, update_data: ProductCreate, db: Session = Depends(get_db)):
+def update(product_id: int, update_data: ProductUpdate, db: Session = Depends(get_db)):
     product = update_product(db, product_id, update_data)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")

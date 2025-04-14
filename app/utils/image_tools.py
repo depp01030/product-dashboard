@@ -98,6 +98,9 @@ def get_admin_product_image_info_list(image_dir: str) -> List[dict]:
     }]
     為了讓前端可以顯示與篩選。當圖片實際顯示時才會觸發壓縮。
     """
+    if not image_dir:
+        return []
+    
     filenames = _get_sorted_images(image_dir)
     result = []
     

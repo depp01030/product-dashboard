@@ -1,8 +1,7 @@
 import json
 from sqlalchemy.orm import Session
 from app.models.product import Product
-from app.schemas.product import ProductCreate, ProductInDB
-from app.schemas.product_query import ProductQueryParams
+from app.schemas.product import ProductCreate, ProductUpdate, ProductInDB, ProductQuery
 from typing import Optional, List
 
 # === 建立商品 ===
@@ -25,7 +24,7 @@ def get_product(db: Session, product_id: int):
 
 def query_products_with_filters(
     db: Session,
-    params: ProductQueryParams,
+    params: ProductQuery,
     offset: int = 0,
     limit: Optional[int] = None
 ) -> List[Product]:
@@ -63,7 +62,7 @@ def query_products_with_filters(
     return query.all()
 
 # === 更新商品 ===
-def update_product_by_dict(db: Session, product_id: int, update_data: dict):
+def _update_product_by_dict(db: Session, product_id: int, update_data: dict):
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         return None
@@ -98,7 +97,7 @@ def update_product_by_dict(db: Session, product_id: int, update_data: dict):
     db.refresh(product)
     return product
 
-def update_product(db: Session, product_id: int, update_data: ProductCreate):
+def update_product(db: Session, product_id: int, update_data: ProductUpdate):
     product = get_product(db, product_id)
     if product is None:
         return None

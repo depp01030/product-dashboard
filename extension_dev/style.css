@@ -1,0 +1,38 @@
+/* 📁 style.css */
+
+body {
+    font-size: 14px;
+    min-width: 320px;
+    max-width: 480px;
+  }
+  
+  h5 {
+    font-weight: bold;
+  }
+  
+  textarea.form-control {
+    resize: vertical;
+  }
+  
+  input.form-control,
+  textarea.form-control,
+  select.form-select {
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+  
+  #message {
+    min-height: 1.5em;
+  }
+  
+  /* 加一點卡片的圓角與陰影感 */
+  form {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  button.btn {
+    font-size: 13px;
+    padding: 4px 12px;
+  }
+  
