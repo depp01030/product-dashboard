@@ -95,6 +95,9 @@ function createToggleButton() {
 let formContainer = null;
 let toggleButton = null;
 
+// 全局變數儲存面板元素
+let productPanel = null;
+
 // 初始化函數
 async function initializeExtension() {
   // 檢查是否已啟用
@@ -142,6 +145,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       removeUI();
     }
   }
+});
+
+// 監聽來自 background script 的消息
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "togglePanel") {
+    toggleProductPanel();
+  }
+  return true;
 });
 
 // 設置事件監聽
@@ -231,17 +242,70 @@ function showError(message) {
   msg.className = "text-danger text-center mt-2 small";
 }
 
-// 載入表單數據
+// 載入已儲存的表單數據
 async function loadFormData() {
-  const form = document.getElementById("product-form");
-  const formFields = form.elements;
   const data = await chrome.storage.local.get('formData');
-  
+  const form = document.getElementById('product-form');
+
   if (data.formData) {
-    Object.keys(data.formData).forEach(key => {
-      if (formFields[key]) {
-        formFields[key].value = data.formData[key];
+    for (const key in data.formData) {
+      const input = form.querySelector(`[name="${key}"]`);
+      if (input) {
+        input.value = data.formData[key];
       }
-    });
+    }
   }
 }
+
+// 切換產品面板顯示或隱藏
+function toggleProductPanel() {
+  if (productPanel) {
+    // 如果面板已存在，則不移除
+    return; // Prevent accidental removal
+  }
+  
+  // 創建面板容器
+  productPanel = document.createElement('div');
+  productPanel.id = 'shopee-product-panel-container';
+  
+  // 創建 iframe 來載入面板頁面
+  const iframe = document.createElement('iframe');
+  iframe.id = 'shopee-product-panel-iframe';
+  
+  // 使用 web_accessible_resources 中聲明的資源
+  iframe.src = chrome.runtime.getURL('panel.html');
+  
+  // 添加 iframe 到面板容器
+  productPanel.appendChild(iframe);
+  
+  // 添加面板到頁面
+  document.body.appendChild(productPanel);
+  
+  // 自動填充當前頁面 URL
+  window.addEventListener('message', function(event) {
+    // 確保消息來自我們的擴充功能
+    if (event.source === iframe.contentWindow) {
+      if (event.data.type === 'PANEL_READY') {
+        iframe.contentWindow.postMessage({
+          type: 'FILL_URL',
+          url: window.location.href
+        }, '*');
+      }
+    }
+  });
+  
+  // 設置關閉面板的處理程序
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && productPanel) {
+      document.body.removeChild(productPanel);
+      productPanel = null;
+    }
+  });
+}
+
+// 確保面板在滾動時不會消失
+window.addEventListener('scroll', function() {
+  if (productPanel) {
+    productPanel.style.top = `${window.scrollY + 80}px`; // Adjust position based on scroll
+  }
+});

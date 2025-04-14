@@ -1,28 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Shopee Product Uploader",
-  "description": "快速填寫商品資訊並送出至後台 API。",
+  "name": "Shopee 商品卡片工具",
   "version": "1.0",
-  "icons": {
-    "16": "icon.png",
-    "48": "icon.png",
-    "128": "icon.png"
+  "description": "點 icon 顯示/隱藏商品表單浮窗",
+  "action": {
+    "default_title": "新增商品",
+    "default_icon": "icon.png"
   },
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
-  "host_permissions": [
-    "http://localhost:8000/*"
-  ],
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "css": ["content.css"],
-      "js": ["content.js"]
-    }
-  ],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' https://cdn.jsdelivr.net;"
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["http://localhost:8000/*"],
+  "background": {
+    "service_worker": "background.js"
   }
 }
