@@ -73,8 +73,15 @@ function createFormContainer() {
             <input class="form-control" name="sizes">
           </div>
 
+          <div class="form-group">
+            <label class="form-label">上傳圖片</label>
+            <input type="file" class="form-control" name="image" id="imageUpload" accept="image/*">
+            <div id="imagePreview" class="mt-2"></div>
+          </div>
+
           <button class="btn btn-primary w-100" type="submit">送出</button>
           <div id="status-msg" class="text-center mt-2 small text-muted"></div>
+          <button class="btn btn-secondary w-100 mt-3" type="reset">新增空白卡片</button>
         </form>
       </div>
     </div>
@@ -231,6 +238,34 @@ function setupEventListeners() {
       showError(`🚫 無法連線到伺服器：${err.message}`);
     }
   });
+
+  const imageUpload = document.getElementById('imageUpload');
+  const imagePreview = document.getElementById('imagePreview');
+
+  imageUpload.addEventListener('change', handleFileSelect);
+  imagePreview.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+  imagePreview.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const files = e.dataTransfer.files;
+    if (files.length) {
+      handleFileSelect({ target: { files } });
+    }
+  });
+}
+
+function handleFileSelect(event) {
+  const files = event.target.files;
+  if (files.length) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      imagePreview.innerHTML = `<img src="${e.target.result}" alt="Image Preview" style="max-width: 100%; height: auto;">`;
+    };
+    reader.readAsDataURL(files[0]);
+  }
 }
 
 // 初始化擴充功能

@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('product-form');
   const statusMsg = document.getElementById('status-msg');
   const closeBtn = document.getElementById('closePanel');
+  const dropZone = document.getElementById('image-drop-zone');
+  const imageInput = document.getElementById('image-input');
+  const imagePreview = document.getElementById('image-preview');
+  let uploadedImages = [];
   
   // 通知內容腳本面板已準備好接收數據
   window.parent.postMessage({ type: 'PANEL_READY' }, '*');
@@ -30,16 +34,78 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
+  // 圖片拖放功能
+  dropZone.addEventListener('click', () => imageInput.click());
+  
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragover');
+  });
+  
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    handleFiles(files);
+  });
+  
+  imageInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+  });
+
+  function handleFiles(files) {
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageData = e.target.result;
+        uploadedImages.push({
+          data: imageData,
+          file: file
+        });
+        updateImagePreview();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function updateImagePreview() {
+    imagePreview.innerHTML = '';
+    uploadedImages.forEach((image, index) => {
+      const preview = document.createElement('div');
+      preview.className = 'image-preview';
+      preview.innerHTML = `
+        <img src="${image.data}" alt="Preview">
+        <button type="button" class="remove-image" data-index="${index}">&times;</button>
+      `;
+      imagePreview.appendChild(preview);
+    });
+
+    // 添加刪除按鈕事件
+    imagePreview.querySelectorAll('.remove-image').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const index = parseInt(e.target.dataset.index);
+        uploadedImages.splice(index, 1);
+        updateImagePreview();
+      });
+    });
+  }
+  
   // 表單提交
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     statusMsg.textContent = "⏳ 送出中...";
     statusMsg.className = "text-center mt-2 small text-muted";
     
+    const formData = new FormData();
     const data = {};
-    const formData = new FormData(form);
     
-    for (const [key, value] of formData.entries()) {
+    for (const [key, value] of new FormData(form).entries()) {
       if (["price", "real_stock"].includes(key)) {
         data[key] = value ? Number(value) : null;
       } else if (["colors", "sizes"].includes(key)) {
@@ -56,14 +122,17 @@ document.addEventListener('DOMContentLoaded', function() {
         data[key] = value || null;
       }
     }
+
+    // 添加圖片數據
+    uploadedImages.forEach((image, index) => {
+      formData.append(`images`, image.file);
+    });
+    formData.append('data', JSON.stringify(data));
     
     try {
       const response = await fetch('http://localhost:8000/admin/products/create', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+        body: formData
       });
       
       if (response.ok) {
@@ -72,6 +141,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 清空表單和儲存的數據
         form.reset();
+        uploadedImages = [];
+        updateImagePreview();
         chrome.storage.local.clear();
       } else {
         const errorData = await response.json();
