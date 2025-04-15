@@ -5,6 +5,7 @@ initProductPage({
   containerId: "product-list",
   filterFormId: "filter-form",
   searchBtnId: "search-btn",
+  addItemBtnId: "add-item-btn",
   loadMoreBtnId: "load-more-btn",
   showFields: [
     "stall_name",

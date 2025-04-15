@@ -1,17 +1,27 @@
+import os
 import json
 from sqlalchemy.orm import Session
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductUpdate, ProductInDB, ProductQuery
 from typing import Optional, List
-
+from app.utils.path_tools import init_item_folder
 # === 建立商品 ===
+
 def create_product(db: Session, product_data: ProductCreate) -> Product:
-    db_product = Product(**product_data.model_dump())
+    # 🌀 先轉成 dict，方便我們後面操作
+    data = product_data.model_dump()
+    
+    # ✅ 自動補上 item_folder，如果沒給的話
+    if not data.get("item_folder"):
+        item_folder = init_item_folder(data['stall_name'], data['name'])
+        data["item_folder"] = item_folder
+
+    # ✅ 寫入資料庫
+    db_product = Product(**data)
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
     return db_product
-
 # === 取得所有商品 ===
 def get_all_products(db: Session):
     return db.query(Product).all()

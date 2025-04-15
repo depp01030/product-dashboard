@@ -10,7 +10,7 @@ class ProductUpdateForm:
         stall_name: Optional[str] = Form(None),
         source: Optional[str] = Form(None),
         source_url: Optional[str] = Form(None),
-        item_status: Optional[str] = Form(None),
+        item_status: Optional[str] = Form("product"),
         material: Optional[str] = Form(None),
         size_metrics: Optional[str] = Form("{}"),  # JSON string
         size_note: Optional[str] = Form(None),

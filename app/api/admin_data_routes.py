@@ -8,11 +8,12 @@ from datetime import datetime, timedelta
 from app.utils.db import get_db
 from app.utils.template_engine import templates
 from app.constants.status_labels import STATUS_LABELS
-
+ 
 from app.models.product import Product
 from app.schemas.product import ProductInDB, ProductUpdate, ProductCreate, ProductQuery
 from app.schemas.product_update_form import ProductUpdateForm 
 from app.services.product_service import (
+    create_product,
     update_product,
     query_products_with_filters
 )
@@ -36,11 +37,21 @@ def get_product_list_with_filter(
     limit: int = Query(100, le=200)
 ): 
     products = query_products_with_filters(db, params, offset=offset, limit=limit)
-
     for p in products: 
         p.image_list = get_admin_product_image_info_list(p.item_folder)
 
     return products
+
+
+# === ✅ 建立商品 ===
+@admin_router.post("/products/create")
+def create_product_from_admin(
+    form: ProductUpdateForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    product = ProductCreate(**form.__dict__)
+    product = create_product(db, product)
+    return product #RedirectResponse(url="/admin/products", status_code=303)
 
 # === ✅ 提交商品編輯表單 ===
 @admin_router.post("/products/{product_id}/update")
@@ -49,6 +60,6 @@ def update_product_from_admin(
     form: ProductUpdateForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    product = ProductUpdate(**form.__dict__)
+    product = ProductUpdate(**form.__dict__) 
     update_product(db, product_id, product)
-    return RedirectResponse(url="/admin/products", status_code=303)
+    return #RedirectResponse(url="/admin/products", status_code=303)

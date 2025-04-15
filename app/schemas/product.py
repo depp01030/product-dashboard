@@ -87,3 +87,4 @@ class ProductInDB(ProductBase):
 
     class Config:
         from_attributes = True
+        use_enum_values = False  # ✅ 重點：告訴 FastAPI 不要回傳 .value，而是 .name

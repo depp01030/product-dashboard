@@ -1,16 +1,17 @@
 // 📁 static/js/utils/init-product-page.js
 
-import { fetchProductsWithFilters } from "./api.js";
-import { renderProductCard } from "./render-card.js";
-import { clearList, appendToList, updateItemCount } from "./render-list.js";
-import { getFiltersFromForm, bindFilterEvents } from "./filter-form.js";
+import { fetchProductsWithFilters } from "./api/api.js";
+import { renderProductCard } from "./dom/render-card.js";
+import { clearList, appendToList, updateItemCount } from "./dom/render-list.js";
+import { getFiltersFromForm, bindFilterEvents } from "./filters/filter-form.js";
 import { resetPagination, getCurrentOffset, increaseOffset, shouldShowLoadMore, bindLoadMore } from "./pagination.js";
-
+import { addtempItemCard } from "./item-operation.js";
 export function initProductPage(config) {
   const {
     containerId,
     filterFormId,
     searchBtnId,
+    addItemBtnId,
     loadMoreBtnId,
     showFields,
     submitPath,
@@ -22,6 +23,7 @@ export function initProductPage(config) {
   const container = document.getElementById(containerId);
   const filterForm = document.getElementById(filterFormId);
   const searchBtn = document.getElementById(searchBtnId);
+  const addItemBtn = document.getElementById(addItemBtnId);
   const loadMoreBtn = document.getElementById(loadMoreBtnId);
 
   async function loadProducts({ reset = false } = {}) {
@@ -29,7 +31,7 @@ export function initProductPage(config) {
       resetPagination();
       clearList(container);
     }
-
+    console.log("loadProducts");
     const filters = { ...defaultFilters, ...getFiltersFromForm(filterForm) };
     const offset = getCurrentOffset();
     const products = await fetchProductsWithFilters(filters, offset, pageSize);
@@ -55,6 +57,13 @@ export function initProductPage(config) {
   // 🔍 綁定查詢按鈕
   if (searchBtn) {
     searchBtn.addEventListener("click", () => loadProducts({ reset: true }));
+  }
+
+  // 🔍 綁定查詢按鈕
+  if (addItemBtn) {// 新增商品卡片按鈕
+    addItemBtn.addEventListener("click", () => {
+      addtempItemCard(container, showFields, submitPath);
+    });    
   }
 
   // 🔁 載入更多
