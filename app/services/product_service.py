@@ -1,10 +1,11 @@
 import os
 import json
+import shutil
 from sqlalchemy.orm import Session
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductUpdate, ProductInDB, ProductQuery
 from typing import Optional, List
-from app.utils.path_tools import init_item_folder
+from app.utils.path_tools import init_item_folder, get_abs_folder_path
 # === 建立商品 ===
 
 def create_product(db: Session, product_data: ProductCreate) -> Product:
@@ -75,45 +76,44 @@ def query_products_with_filters(
     return query.all()
 
 # === 更新商品 ===
-def _update_product_by_dict(db: Session, product_id: int, update_data: dict):
-    product = db.query(Product).filter(Product.id == product_id).first()
-    if not product:
-        return None
-        
-    for key, value in update_data.items():
-        if key == 'size_metrics':
-            # 特殊處理 size_metrics，確保它是一個有效的 JSON 字典
-            if isinstance(value, dict):
-                value = json.dumps(value)
-            elif isinstance(value, str):
-                try:
-                    parsed = json.loads(value)
-                    if not isinstance(parsed, dict):
-                        value = '{}'
-                except json.JSONDecodeError:
-                    value = '{}'
-        elif key in ['colors', 'sizes', 'logistics_options']:
-            # 處理其他 JSON 列表欄位
-            if isinstance(value, (list, dict)):
-                value = json.dumps(value)
-            elif isinstance(value, str):
-                try:
-                    json.loads(value)  # 驗證 JSON 格式
-                except json.JSONDecodeError:
-                    value = '[]'
-        elif isinstance(value, str) and value.strip().lower() == "none":
-            value = None
-            
-        setattr(product, key, value)
-        
-    db.commit()
-    db.refresh(product)
-    return product
 
 def update_product(db: Session, product_id: int, update_data: ProductUpdate):
+    '''
+    更新產品主服務（不論是哪個route 進來的）
+    
+    關於item_folder的更新：
+        建立時會自動生成item_folder （檔口/商品名稱）
+        如果更新時的item_folder為空，則會保持不變
+        如果更新時，stall_name or name 有變更，則會自動生成新的item_folder
+        且還會把原本的folder資料完全搬到新folder，並刪除原本的folder
+    '''
     product = get_product(db, product_id)
     if product is None:
         return None
+    # item_folder的更新
+    if (not update_data.item_folder) or \
+        (product.stall_name != update_data.stall_name) or \
+        (product.name != update_data.name):
+        # 生成新的資料夾
+        new_item_folder = init_item_folder(update_data.stall_name, update_data.name)
+        update_data.item_folder = new_item_folder
+        old_item_folder = product.item_folder 
+        # 先刪除舊資料夾
+        if old_item_folder is not None and old_item_folder != "":
+            old_item_path = get_abs_folder_path(product.item_folder)
+            new_item_path = get_abs_folder_path(update_data.item_folder)
+        
+            if os.path.exists(old_item_path):
+                # 1. 把舊資料夾的內容搬到新資料夾
+                
+                for filename in os.listdir(old_item_path):
+                    src_path = os.path.join(old_item_path, filename)
+                    dst_path = os.path.join(new_item_path, filename)
+                    shutil.move(src_path, dst_path)
+                if product.stall_name != "" and product.stall_name is not None:
+                    # 2. 刪除舊資料夾
+                    shutil.rmtree(old_item_path)
+        
     for key, value in update_data.model_dump().items():
         setattr(product, key, value)
     db.commit()
@@ -122,9 +122,19 @@ def update_product(db: Session, product_id: int, update_data: ProductUpdate):
 
 # === 刪除商品 ===
 def delete_product(db: Session, product_id: int):
+    '''
+    刪除商品
+        前端會刪除商品卡片，這裡會刪除ｄｂ
+        如果這時stall_name有值，則會刪除對應的資料夾
+    '''
     product = get_product(db, product_id)
     if product is None:
         return None
+    if (product.stall_name != "" and product.stall_name is not None) and \
+        (product.item_folder != "" and product.item_folder is not None):
+        # 刪除資料夾
+        if os.path.exists(get_abs_folder_path(product.item_folder)):
+            shutil.rmtree(get_abs_folder_path(product.item_folder))
     db.delete(product)
     db.commit()
     return product

@@ -9,6 +9,9 @@ class ProductBase(BaseModel):
     # === 基本資訊 ===
     name: Optional[str] = None
     description: Optional[str] = None
+    # === 商品資訊 ===
+    purchase_price: Optional[float] = None
+    total_cost: Optional[float] = None
     price: Optional[float] = None
     stall_name: Optional[str] = None
     source: Optional[str] = None
@@ -24,17 +27,15 @@ class ProductBase(BaseModel):
 
     # === 圖片與資料夾 ===
     item_folder: Optional[str] = None       
-    main_image: Optional[str] = None           
+    main_image: Optional[str] = None    
+    image_name_list: Optional[List[str]] = []       
 
     # === 規格資料 ===
     colors: List[str] = []
     sizes: List[str] = []
 
     # === Shopee 上傳欄位 ===
-    shopee_category_id: Optional[int] = None
-    min_purchase_qty: Optional[int] = 1
-    preparation_days: Optional[int] = None
-    logistics_options: List[str] = []
+    shopee_category_id: Optional[int] = None 
 
     @field_validator('size_metrics', mode='before')
     @classmethod
@@ -51,7 +52,7 @@ class ProductBase(BaseModel):
                 return {}
         return {}
 
-    @field_validator('colors', 'sizes', 'logistics_options', mode='before')
+    @field_validator('colors', 'sizes', 'image_name_list', mode='before')
     @classmethod
     def ensure_list_fields(cls, value: Any) -> List[str]:
         if value is None:
@@ -80,7 +81,9 @@ class ProductUpdate(ProductBase):
     pass
 class ProductInDB(ProductBase):
     id: int 
+    
     image_list: Optional[List[dict]] = []
+    
     shopee_item_id: Optional[str] = None
     created_at: Optional[datetime] = None 
     updated_at: Optional[datetime] = None 

@@ -15,6 +15,7 @@ from app.schemas.product_update_form import ProductUpdateForm
 from app.services.product_service import (
     create_product,
     update_product,
+    delete_product,
     query_products_with_filters
 )
 from app.services.import_service import import_candidates_from_folder
@@ -63,3 +64,8 @@ def update_product_from_admin(
     product = ProductUpdate(**form.__dict__) 
     update_product(db, product_id, product)
     return #RedirectResponse(url="/admin/products", status_code=303)
+
+@admin_router.delete("/products/{product_id}/delete")
+def delete_product_from_admin(product_id: int, db: Session = Depends(get_db)):
+    delete_product(db, product_id)
+    return  

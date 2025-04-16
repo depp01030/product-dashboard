@@ -8,6 +8,7 @@ initProductPage({
   addItemBtnId: "add-item-btn",
   loadMoreBtnId: "load-more-btn",
   showFields: [
+    "source_url",
     "stall_name",
     "source",
     "name",
