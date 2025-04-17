@@ -65,7 +65,7 @@ class Product(Base):
     # === 圖片管理 ===
     item_folder = Column(String(255))                        # 相對資料夾路徑(產品主資料夾）（例如：A001/001_涼感褲）
     main_image = Column(String(255), nullable=True)          # 主圖片檔名（例如：1.jpg）
-    image_name_list = Column(JSON, nullable=True)            # 圖片列表（["1.jpg", "2.jpg"]）
+    selected_images = Column(JSON, nullable=True)            # 已選圖片清單（["1.jpg", "2.jpg"]）
 
     # === 商品分類與設定 ===
     shopee_category_id = Column(Integer, nullable=True)     # Shopee 類別 ID（純數字）

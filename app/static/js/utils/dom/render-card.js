@@ -131,8 +131,6 @@ function renderHeader(product, showFields) {
   return section;
 }
 
-
-
 function renderLeftPanel(product, showFields) {
   const container = document.createElement("div");
   container.className = "bg-light rounded-3 p-3 d-flex flex-column gap-3";
@@ -140,7 +138,6 @@ function renderLeftPanel(product, showFields) {
   // 價格區塊（訂購價、總成本、價格）
   const priceRow = document.createElement("div");
   priceRow.className = "row g-3";
-
   priceRow.innerHTML = `
     <div class="col-4">
       <label class="form-label text-muted small">訂購價</label>
@@ -159,6 +156,9 @@ function renderLeftPanel(product, showFields) {
     </div>
   `;
   container.appendChild(priceRow);
+
+  // 綁定總成本公式提示
+  bindCostHint(container);
 
   // 商品描述
   if (showFields.includes("description")) {
@@ -193,15 +193,6 @@ function renderLeftPanel(product, showFields) {
   `;
   container.appendChild(material);
 
-  // // 尺寸描述
-  // const sizeNote = document.createElement("div");
-  // sizeNote.innerHTML = `
-  //   <label class="form-label text-muted small">尺寸描述</label>
-  //   <input name="size_note" class="form-control border-0 bg-white"
-  //          value="${product.size_note || ""}">
-  // `;
-  // container.appendChild(sizeNote);
-
   // 尺寸欄位（Key-Value 格式）
   const sizeMetricsWidget = createDynamicKVInput("size_metrics", product.size_metrics || {});
   sizeMetricsWidget.id = "size-metrics-widget";
@@ -220,3 +211,37 @@ function renderLeftPanel(product, showFields) {
   return container;
 }
 
+function bindCostHint(container) {
+  const pPurchase = container.querySelector('input[name="purchase_price"]');
+  const pCost     = container.querySelector('input[name="total_cost"]');
+
+  const shippingRatio     = 1.03;
+  const internationalFee  = 3500;
+  const exchangeRate      = 40;
+  const tariff            = 20;
+  const platformCostRatio = 1.09;
+
+  const hint = document.createElement("div");
+  hint.className = "text-muted small fst-italic mt-1";
+  hint.style.display = "none";
+  hint.textContent = `（（訂購價 × 貨運成本：${shippingRatio} + 國際運費：${internationalFee}） / 匯率：${exchangeRate} + 關稅：${tariff}） × 上架成本：${platformCostRatio} = 總成本`;
+  pPurchase.parentNode.appendChild(hint);
+
+  pPurchase.addEventListener("focus", () => {
+    hint.style.display = "block";
+  });
+
+  pPurchase.addEventListener("input", () => {
+    const val = parseFloat(pPurchase.value);
+    if (!isNaN(val)) {
+      const cost = (((val * shippingRatio + internationalFee) / exchangeRate + tariff) * platformCostRatio);
+      pCost.value = Math.round(cost);
+    } else {
+      pCost.value = "";
+    }
+  });
+
+  pPurchase.addEventListener("blur", () => {
+    hint.style.display = "none";
+  });
+}

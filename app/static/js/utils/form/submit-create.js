@@ -8,7 +8,10 @@ import { renderProductCard } from "../dom/render-card.js";
 export async function submitCreateHandler(e, form) {
   e.preventDefault();
   const formData = extractFormData(form, false);
-
+  for (let [key, value] of formData.entries()) {
+    console.log(`${key}:`, value);
+  }
+  
   const res = await fetch("/admin/products/create", {
     method: "POST",
     body: formData

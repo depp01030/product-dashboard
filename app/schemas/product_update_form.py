@@ -23,7 +23,7 @@ class ProductUpdateForm:
         colors: Optional[str] = Form(""),
         sizes: Optional[str] = Form(""),
         item_folder: Optional[str] = Form(None),
-        image_name_list: Optional[List[str]] = Form([]),
+        selected_images: Optional[List[str]] = Form(None),
         main_image: Optional[str] = Form(None)
     ):
         self.name = name
@@ -46,5 +46,5 @@ class ProductUpdateForm:
         self.sizes = [s.strip() for s in sizes.split(",") if s.strip()] 
         
         self.item_folder = item_folder
-        self.image_name_list = image_name_list
+        self.selected_images = selected_images or []
         self.main_image = main_image

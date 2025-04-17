@@ -7,12 +7,8 @@ from PIL import Image
 import io
 from app.utils.config import get_candidates_root, get_products_root
 from app.models.product import Product
-from app.utils.config import load_env 
-
-load_env()
-
-CANDIDATES_ROOT = os.getenv("CANDIDATES_ROOT")
-PRODUCTS_ROOT = os.getenv("PRODUCTS_ROOT")
+from app.utils.config import CANDIDATES_ROOT, PRODUCTS_ROOT 
+ 
 
 def get_thumbs_path(image_path: str) -> str:
     """

@@ -1,5 +1,5 @@
 # 📁 app/api/admin_data_routes.py
-from fastapi import APIRouter, Request, Depends, Form, Query
+from fastapi import APIRouter, Request, Depends, Form, Query, File, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from typing import List
@@ -48,10 +48,11 @@ def get_product_list_with_filter(
 @admin_router.post("/products/create")
 def create_product_from_admin(
     form: ProductUpdateForm = Depends(),
+    image_import: list[UploadFile] = File(default=[]),  # ✅ default 為空，使用者沒選也沒關係
     db: Session = Depends(get_db)
 ):
     product = ProductCreate(**form.__dict__)
-    product = create_product(db, product)
+    product = create_product(db, product, image_import)
     return product #RedirectResponse(url="/admin/products", status_code=303)
 
 # === ✅ 提交商品編輯表單 ===
@@ -59,13 +60,20 @@ def create_product_from_admin(
 def update_product_from_admin(
     product_id: int,
     form: ProductUpdateForm = Depends(),
+    image_import: list[UploadFile] = File(default=[]),  # ✅ default 為空，使用者沒選也沒關係
     db: Session = Depends(get_db)
 ):
     product = ProductUpdate(**form.__dict__) 
-    update_product(db, product_id, product)
+    update_product(db, product_id, product, image_import)
     return #RedirectResponse(url="/admin/products", status_code=303)
 
+# === ✅ 刪除商品 ===
 @admin_router.delete("/products/{product_id}/delete")
 def delete_product_from_admin(product_id: int, db: Session = Depends(get_db)):
     delete_product(db, product_id)
     return  
+
+@admin_router.delete("/products/{pid}/images/{filename}")
+def delete_image(pid: int, filename: str, db: Session = Depends(get_db)):
+    # 實作：刪檔、更新 image_name_list
+    return {"ok": True}

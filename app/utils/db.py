@@ -2,13 +2,8 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from app.utils.config import get_database_uri, load_env
+from app.utils.config import DATABASE_URL
 
-# 載入 .env 環境變數
-load_env()
-
-# 取得資料庫連線字串
-DATABASE_URL = get_database_uri()
 
 # 建立資料庫引擎與 Session
 engine = create_engine(DATABASE_URL)

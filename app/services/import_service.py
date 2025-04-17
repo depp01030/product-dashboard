@@ -4,10 +4,8 @@ import os
 from app.utils.db import SessionLocal
 from app.models.product import Product
 from app.models.enums import ItemStatusEnum
-from app.utils.config import load_env
-
-load_env()
-CANDIDATES_ROOT = os.getenv("CANDIDATES_ROOT")
+from app.utils.config import CANDIDATES_ROOT
+ 
 
 def import_candidates_from_folder() -> int:
     db = SessionLocal()

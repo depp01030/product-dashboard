@@ -1,7 +1,5 @@
 import os 
-from app.utils.config import load_env 
-load_env()
-PRODUCTS_ROOT = os.getenv("PRODUCTS_ROOT", "")
+from app.utils.config import PRODUCTS_ROOT  
 
 
 def _get_item_folder(stall_name, product_name):

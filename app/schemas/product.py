@@ -28,7 +28,7 @@ class ProductBase(BaseModel):
     # === 圖片與資料夾 ===
     item_folder: Optional[str] = None       
     main_image: Optional[str] = None    
-    image_name_list: Optional[List[str]] = []       
+    selected_images: Optional[List[str]] = []       
 
     # === 規格資料 ===
     colors: List[str] = []
@@ -52,7 +52,7 @@ class ProductBase(BaseModel):
                 return {}
         return {}
 
-    @field_validator('colors', 'sizes', 'image_name_list', mode='before')
+    @field_validator('colors', 'sizes', 'selected_images', mode='before')
     @classmethod
     def ensure_list_fields(cls, value: Any) -> List[str]:
         if value is None:
