@@ -11,7 +11,7 @@ from app.schemas.product import (
     ProductQueryParams,
     ProductInDB,
 )
-from app.schemas.pagination import PaginatedProducts, ProductDetailResponse
+from app.schemas.pagination import PaginatedProducts 
 from app.services import product_service
 
 router = APIRouter(prefix="/api/admin/products", tags=["Products"])

@@ -10,7 +10,7 @@ from app.utils.config import PRODUCTS_ROOT, CANDIDATES_ROOT
 from app.utils.db import Base, engine
 
 from fastapi import FastAPI
-from api.admin import products, product_images, auth
+from app.api.admin import products 
 
 app = FastAPI(
     title="Shopee 自動上架系統",
@@ -30,8 +30,8 @@ app.add_middleware(
 
 # 依功能註冊 router
 app.include_router(products.router, prefix="/api/admin/products", tags=["Products"])
-app.include_router(product_images.router, prefix="/api/admin/products/{product_id}/images", tags=["Product Images"])
-app.include_router(auth.router, prefix="/api/admin/auth", tags=["Auth"])
+# app.include_router(product_images.router, prefix="/api/admin/products/{product_id}/images", tags=["Product Images"])
+# app.include_router(auth.router, prefix="/api/admin/auth", tags=["Auth"])
 
 
 # 自動建立資料表

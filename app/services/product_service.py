@@ -1,87 +1,112 @@
 # app/services/product_service.py
 """
-商品 Service  ── 專責商業邏輯，不處理 FastAPI 相關細節
+商品 Service ── 專責商業邏輯
 """
-
-from __future__ import annotations
-
 from typing import List, Tuple
-
 from sqlalchemy.orm import Session
+from sqlalchemy import asc, desc
 
 from app.models.product import Product
 from app.schemas.product import (
     ProductCreate,
     ProductUpdate,
     ProductQueryParams,
-    ProductQuery,
     ProductInDB,
 )
 from app.schemas.pagination import PaginatedProducts
-from app.services.product_service_logic import (
-    query_products_with_filters,  # 你先前的查詢工具函式
-)
 from app.utils.image_tools import get_admin_product_image_info_list
 
 
-# ────────────────────────────────────────────────────────────────────
-# 查 詢
-# ────────────────────────────────────────────────────────────────────
-def get_products(db: Session, params: ProductQueryParams) -> PaginatedProducts:
-    """依傳入條件分頁取得商品清單"""
+# ───────────────────────────────────────────────
+# 篩選工具
+# ───────────────────────────────────────────────
+def filter_products(
+    db: Session,
+    params: ProductQueryParams
+) -> Tuple[List[Product], int]:
+    """
+    依 ProductQueryParams 組條件，**含分頁**。
+    回傳 (當頁商品 list, 總筆數)
+    """
+    query = db.query(Product)
 
-    # 1. 轉換 QueryParams → 原 query_products_with_filters 需要的 ProductQuery
+    # ---- 精準欄位 ---------------------------------------------------
+    if params.id is not None:
+        query = query.filter(Product.id == params.id)
 
+    if params.source:
+        query = query.filter(Product.source.ilike(f"%{params.source}%"))
 
-    # 2. 先算 total（不分頁）
-    total_items: List[Product] = query_products_with_filters(
-        db, params, offset=0, limit=None
-    )
-    total = len(total_items)
+    # ---- 模糊欄位 ---------------------------------------------------
+    if params.name:
+        kw = params.name.replace("*", "%")
+        query = query.filter(Product.name.ilike(f"%{kw}%"))
 
-    # 3. 取得當頁資料
+    if params.stall:
+        kw = params.stall.replace("*", "%")
+        query = query.filter(Product.stall_name.ilike(f"%{kw}%"))
+
+    # ---- 日期 -------------------------------------------------------
+    if params.from_date:
+        query = query.filter(Product.created_at >= params.from_date)
+
+    # ---- 排序 -------------------------------------------------------
+    sort_col = getattr(Product, params.sort_by, Product.created_at)
+    direction = desc if params.sort_order == "desc" else asc
+    query = query.order_by(direction(sort_col))
+
+    # ---- 分頁 -------------------------------------------------------
+    total_count = query.count()
     offset = (params.page - 1) * params.page_size
-    page_items: List[Product] = query_products_with_filters(
-        db, params, offset=offset, limit=params.page_size
-    )
+    page_items = query.offset(offset).limit(params.page_size).all()
 
-    # 4. 組回傳
+    return page_items, total_count
+
+
+# ───────────────────────────────────────────────
+# 取得分頁商品清單
+# ───────────────────────────────────────────────
+def get_products(db: Session, params: ProductQueryParams) -> PaginatedProducts:
+    """
+    先呼叫 filter_products 取得 (資料, 總筆數)，
+    再組成 PaginatedProducts 回傳
+    """
+    page_items, total = filter_products(db, params)
+
     total_pages = (total + params.page_size - 1) // params.page_size
     return PaginatedProducts(
-        items=[ProductInDB.from_orm(p) for p in page_items],
+        items=[ProductInDB.model_validate(p, from_attributes=True) for p in page_items],
         total=total,
         page=params.page,
         page_size=params.page_size,
         total_pages=total_pages,
     )
-
-
 def get_product_detail(db: Session, product_id: int) -> ProductInDB:
-    """取得單一商品詳情；找不到 raise ValueError"""
-    product: Product | None = db.query(Product).filter(Product.id == product_id).first()
+    """
+    取得單一商品詳情；若找不到則 raise ValueError
+    """
+    product = db.query(Product).filter(Product.id == product_id).first()
     if product is None:
         raise ValueError("商品不存在")
 
-    # ➜ 補上圖片清單（若你不想要可刪）
-    images = get_admin_product_image_info_list(product_id)
-    product_data = ProductInDB.from_orm(product).dict()
-    product_data["image_list"] = images
-    return ProductInDB(**product_data)
+    schema_obj = ProductInDB.model_validate(product, from_attributes=True)
+    # schema_obj.image_list = get_admin_product_image_info_list(product_id)
+    return schema_obj
 
 
-# ────────────────────────────────────────────────────────────────────
-# 建 立 / 更 新
-# ────────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────
+# 建立 / 更新
+# ───────────────────────────────────────────────
 def create_product(db: Session, data: ProductCreate) -> ProductInDB:
-    new_p = Product(**data.dict(exclude_unset=True))
-    db.add(new_p)
+    new_product = Product(**data.dict(exclude_unset=True))
+    db.add(new_product)
     db.commit()
-    db.refresh(new_p)
-    return ProductInDB.from_orm(new_p)
+    db.refresh(new_product)
+    return ProductInDB.model_validate(new_product, from_attributes=True)
 
 
 def update_product(db: Session, product_id: int, data: ProductUpdate) -> ProductInDB:
-    product: Product | None = db.query(Product).filter(Product.id == product_id).first()
+    product = db.query(Product).filter(Product.id == product_id).first()
     if product is None:
         raise ValueError("商品不存在")
 
@@ -90,30 +115,30 @@ def update_product(db: Session, product_id: int, data: ProductUpdate) -> Product
 
     db.commit()
     db.refresh(product)
-    return ProductInDB.from_orm(product)
+    return ProductInDB.model_validate(product, from_attributes=True)
 
 
-# ────────────────────────────────────────────────────────────────────
-# 刪 除
-# ────────────────────────────────────────────────────────────────────
+# ───────────────────────────────────────────────
+# 刪除
+# ───────────────────────────────────────────────
 def delete_product(db: Session, product_id: int) -> bool:
     product = db.query(Product).filter(Product.id == product_id).first()
-    if not product:
+    if product is None:
         return False
     db.delete(product)
     db.commit()
     return True
 
 
-def batch_delete_products(db: Session, ids: List[int]) -> Tuple[int, List[int]]:
-    """回傳 (成功刪除數, 刪除失敗 id 列表)"""
+def batch_delete_products(db: Session, product_ids: List[int]) -> Tuple[int, List[int]]:
+    """回傳 (成功刪除數, 刪除失敗的 product_id 列表)"""
     success_cnt = 0
     failed: List[int] = []
 
-    for pid in ids:
-        if delete_product(db, pid):
+    for product_id in product_ids:
+        if delete_product(db, product_id):
             success_cnt += 1
         else:
-            failed.append(pid)
+            failed.append(product_id)
 
     return success_cnt, failed
