@@ -33,9 +33,7 @@ class ProductBase(BaseModel):
     # === 規格資料 ===
     colors: List[str] = []
     sizes: List[str] = []
-
-    # === Shopee 上傳欄位 ===
-    shopee_category_id: Optional[int] = None 
+ 
 
     @field_validator('size_metrics', mode='before')
     @classmethod
@@ -67,13 +65,7 @@ class ProductBase(BaseModel):
                 return []
         return []
 
-class ProductQuery(ProductBase):
-    id: Optional[int] = Field(None, description="商品 ID 精準比對")
-    name: Optional[str] = Field(None, description="商品名稱模糊比對")
-    item_status: Optional[str] = Field(None, description="商品狀態 (candidate/product/ignore)")
-    stall: Optional[str] = Field(None, description="檔口名稱模糊比對")
-    from_date: Optional[date] = Field(None, description="從此日期開始建立的商品")
-    source_url: Optional[str] = Field(None, description="網站名稱模糊比對")
+ 
 class ProductCreate(ProductBase):
     pass
 
@@ -90,3 +82,19 @@ class ProductInDB(ProductBase):
     class Config:
         from_attributes = True
         use_enum_values = False  # ✅ 重點：告訴 FastAPI 不要回傳 .value，而是 .name
+
+
+# ======== 查詢用 params ======== #
+
+class ProductQueryParams(BaseModel):
+    page: int = Field(1, ge=1, description="第幾頁（從1開始）")
+    page_size: int = Field(20, ge=1, le=100, description="每頁幾筆")
+    sort_by: str = Field("created_at", description="排序欄位，例如 created_at / price / name")
+    sort_order: str = Field("desc", description="排序方式 asc 或 desc")
+
+    id: Optional[int] = Field(None, description="商品 ID 精準比對")
+    name: Optional[str] = Field(None, description="商品名稱模糊比對")
+    stall: Optional[str] = Field(None, description="檔口名稱模糊比對")
+    from_date: Optional[date] = Field(None, description="從此日期開始建立的商品")
+    source: Optional[str] = Field(None, description="來源模糊比對")
+ 

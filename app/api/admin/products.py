@@ -1,25 +1,93 @@
-# 📁 app/api/admin_data_routes.py
-from fastapi import APIRouter, Request, Depends, Form, Query, File, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse
-from sqlalchemy.orm import Session
+# app/api/admin/products.py
 from typing import List
-from datetime import datetime, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, status, Response
+from sqlalchemy.orm import Session
 
 from app.utils.db import get_db
-from app.utils.template_engine import templates
-from app.constants.status_labels import STATUS_LABELS
- 
-from app.models.product import Product
-from app.schemas.product import ProductInDB, ProductUpdate, ProductCreate, ProductQuery
-from app.schemas.product_update_form import ProductUpdateForm 
-from app.services.product_service import (
-    create_product,
-    update_product,
-    delete_product,
-    query_products_with_filters
+from app.schemas.product import (
+    ProductCreate,
+    ProductUpdate,
+    ProductQueryParams,
+    ProductInDB,
 )
-from app.services.import_service import import_candidates_from_folder
-from app.utils.image_tools import get_admin_product_image_info_list
+from app.schemas.pagination import PaginatedProducts, ProductDetailResponse
+from app.services import product_service
 
-admin = APIRouter(prefix="/admin", tags=["admin_data"])
+router = APIRouter(prefix="/api/admin/products", tags=["Products"])
 
+# --------------------------------------------------------------------
+# 1.  商品清單  -------------------------------------------------------
+# --------------------------------------------------------------------
+@router.get("/", response_model=PaginatedProducts) 
+async def get_products(
+    query: ProductQueryParams = Depends(),
+    db: Session = Depends(get_db),
+):
+    return product_service.get_products(db, query)
+
+# --------------------------------------------------------------------
+# 2.  商品詳情  -------------------------------------------------------
+# --------------------------------------------------------------------
+@router.get("/{product_id}", response_model=ProductInDB)
+async def get_product_detail(
+    product_id: int,
+    db: Session = Depends(get_db),
+):
+    try:
+        return product_service.get_product_detail(db, product_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="商品不存在")
+
+# --------------------------------------------------------------------
+# 3.  建立商品  -------------------------------------------------------
+# --------------------------------------------------------------------
+@router.post("/", response_model=ProductInDB, status_code=status.HTTP_201_CREATED)
+async def create_new_product(
+    data: ProductCreate,
+    db: Session = Depends(get_db),
+):
+    return product_service.create_product(db, data)
+
+# --------------------------------------------------------------------
+# 4.  更新商品  -------------------------------------------------------
+# --------------------------------------------------------------------
+@router.put("/{product_id}", response_model=ProductInDB)
+async def update_product_data(
+    product_id: int,
+    data: ProductUpdate,
+    db: Session = Depends(get_db),
+):
+    try:
+        return product_service.update_product(db, product_id, data)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="商品不存在")
+
+# --------------------------------------------------------------------
+# 5.  刪除商品  -------------------------------------------------------
+# --------------------------------------------------------------------
+@router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+):
+    if not product_service.delete_product(db, product_id):
+        raise HTTPException(status_code=404, detail="商品不存在")
+    # 204 No-Content 回傳空 body
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+# --------------------------------------------------------------------
+# 6.  批次刪除  ------------------------------------------------------
+# --------------------------------------------------------------------
+@router.post("/batch-delete")
+async def batch_delete_products(
+    ids: List[int],
+    db: Session = Depends(get_db),
+):
+    success_cnt, failed_ids = product_service.batch_delete_products(db, ids)
+    return {
+        "total": len(ids),
+        "success_count": success_cnt,
+        "failed_count": len(failed_ids),
+        "failed_ids": failed_ids,
+    }
