@@ -73,7 +73,7 @@ def delete_product_from_admin(product_id: int, db: Session = Depends(get_db)):
     delete_product(db, product_id)
     return  
 
-@admin_router.delete("/products/{pid}/images/{filename}")
-def delete_image(pid: int, filename: str, db: Session = Depends(get_db)):
+@admin_router.delete("/products/{id}/images/{filename}")
+def delete_image(id: int, filename: str, db: Session = Depends(get_db)):
     # 實作：刪檔、更新 image_name_list
     return {"ok": True}

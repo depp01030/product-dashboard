@@ -30,7 +30,7 @@ export function initProductPage(config) {
     if (reset) {
       resetPagination();
       clearList(container);
-    }
+    }  
     console.log("loadProducts");
     const filters = { ...defaultFilters, ...getFiltersFromForm(filterForm) };
     const offset = getCurrentOffset();

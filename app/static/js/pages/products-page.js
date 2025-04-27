@@ -23,3 +23,14 @@ initProductPage({
   submitPath: "/admin/products",
   defaultFilters: { item_status: "product" }
 });
+
+// 👇 這裡加
+const container = document.getElementById("product-list");
+if (container) {
+  const img = document.createElement("img");
+  img.src = "https://pub-bb9127b0307b40cc94deb60de4f6422f.r2.dev/test_uploads/QrCode.jpg";
+  img.alt = "測試圖片";
+  img.style.width = "200px";
+  img.style.marginBottom = "1rem";
+  container.prepend(img);
+}
