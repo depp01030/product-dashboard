@@ -83,8 +83,7 @@ class ProductInDB(ProductBase):
     id: int 
     
     image_list: Optional[List[dict]] = []
-    
-    shopee_item_id: Optional[str] = None
+     
     created_at: Optional[datetime] = None 
     updated_at: Optional[datetime] = None 
 
