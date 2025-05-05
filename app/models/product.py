@@ -3,6 +3,7 @@
 from sqlalchemy import Column, Integer, String, Text, DECIMAL, DateTime, JSON
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.models.enums import ItemStatusEnum, LogisticsOptionEnum, CustomTypeEnum, SizeMetricsEnum
 from app.utils.db import Base
 
@@ -30,10 +31,13 @@ shipping_ratio：貨運費比例：貨運費占訂購價的比例，例如 0.2 �
 listing_ratio：上架費比例：平台上架費用占售價的比例，例如 0.1 表示佔 10%。
 
 
-'''
+''' 
+
 
 class Product(Base):
     __tablename__ = "products"
+
+    images = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
 
     id = Column(Integer, primary_key=True, index=True) 
 

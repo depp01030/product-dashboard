@@ -4,6 +4,7 @@ from typing import Optional, List, Dict, Any, Union
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, date
 import json
+from app.models.enums import CustomTypeEnum
 
 class ProductBase(BaseModel):
     # === 基本資訊 ===
@@ -18,21 +19,20 @@ class ProductBase(BaseModel):
     source_url: Optional[str] = None
 
     # === 額外資訊 ===
-    custom_type: Optional[str] = None          
+    custom_type: Optional[CustomTypeEnum] = CustomTypeEnum.other
     material: Optional[str] = None             
-    size_metrics: Dict[str, str] = {}    # Changed from Optional[Dict] to Dict with default
+    size_metrics: Dict[str, str] = Field(default_factory=dict)   # Changed from Optional[Dict] to Dict with default
     size_note: Optional[str] = None            
     real_stock: Optional[int] = None           
-    item_status: Optional[str] = None          
-
+   
     # === 圖片與資料夾 ===
     item_folder: Optional[str] = None       
     main_image: Optional[str] = None    
-    selected_images: Optional[List[str]] = []       
+    selected_images: Optional[List[str]] = Field(default_factory=list)      
 
     # === 規格資料 ===
-    colors: List[str] = []
-    sizes: List[str] = []
+    colors: List[str] = Field(default_factory=list)
+    sizes: List[str] = Field(default_factory=list)
  
 
     @field_validator('size_metrics', mode='before')
@@ -97,4 +97,3 @@ class ProductQueryParams(BaseModel):
     stall: Optional[str] = Field(None, description="檔口名稱模糊比對")
     from_date: Optional[date] = Field(None, description="從此日期開始建立的商品")
     source: Optional[str] = Field(None, description="來源模糊比對")
- 
