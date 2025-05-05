@@ -24,6 +24,7 @@ async def get_products(
     query: ProductQueryParams = Depends(),
     db: Session = Depends(get_db),
 ):
+    print(query)
     return product_service.get_products(db, query)
 
 # --------------------------------------------------------------------

@@ -23,8 +23,7 @@ async def process_product_images(
     image_service: BaseImageService,
 ) -> dict:
     import json
-    from app.models import ProductImage, Product
-    print(image_data_json)
+    from app.models import ProductImage, Product 
     submissions = json.loads(image_data_json)
     results = []
     message = {}
@@ -33,8 +32,7 @@ async def process_product_images(
     # ✅ 提前查出商品（只查一次）
     product = db.query(Product).get(product_id)
     if not product:
-        raise ValueError("Product not found")
-
+        raise ValueError("Product not found") 
     for data in submissions:
         action = data.get("action")
         temp_id = data.get("temp_id")
@@ -50,7 +48,8 @@ async def process_product_images(
                     error[temp_id] = "缺少對應圖片檔案"
                     continue
 
-                file_name = file.file_name
+                file_name = file.filename
+                print(file_name)
                 local_path = await image_service.save_file(file, product, file_name)
 
                 image = ProductImage(
@@ -67,8 +66,7 @@ async def process_product_images(
                 image = db.query(ProductImage).get(image_id)
                 if not image:
                     error[image_id] = "找不到圖片"
-                    continue
-                print('hi')
+                    continue 
                 image.is_main = is_main
                 image.is_selected = is_selected
                 db.commit()

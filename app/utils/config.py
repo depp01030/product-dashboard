@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
 
+load_dotenv()
 def load_env():
     load_dotenv()
-
 def get_database_uri():
     return (
         f"mysql+mysqlconnector://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"

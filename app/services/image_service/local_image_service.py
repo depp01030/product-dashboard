@@ -22,7 +22,7 @@ class LocalImageService(BaseImageService):
         - 實際儲存路徑為：{base_dir}/{stall_name}/{product_name}/{file_name}
         - 適用於自訂檔名或保留原始檔名（由呼叫端控制 file_name 內容）
         """
-        # 組成儲存資料夾路徑
+        # 組成儲存資料夾路徑 
         folder = os.path.join(self.base_dir, product.stall_name, product.name)
         os.makedirs(folder, exist_ok=True)
 

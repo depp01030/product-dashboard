@@ -1,6 +1,8 @@
 # 📁 app/api/admin/product_images.py
 
 from fastapi import APIRouter, UploadFile, Form, Request, Depends, status, HTTPException
+
+import starlette.datastructures
 from sqlalchemy.orm import Session
 from typing import Annotated, Optional, List
 
@@ -28,9 +30,12 @@ async def save_image_changes(
     db: Session = Depends(get_db),
     image_service: BaseImageService = Depends(get_image_service),
 ):
-    form = await request.form()
-    files = {k: v for k, v in form.items() if isinstance(v, UploadFile)}
- 
+    form = await request.form() 
+    files = {}
+    
+    for k, v in form.multi_items(): 
+        if isinstance(v, starlette.datastructures.UploadFile): 
+            files[k] = v 
     result = await product_image_service.process_product_images(
         db=db,
         product_id=product_id,
