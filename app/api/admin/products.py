@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/admin/products", tags=["Products"])
 # --------------------------------------------------------------------
 # 1.  商品清單  -------------------------------------------------------
 # --------------------------------------------------------------------
-@router.get("/", response_model=PaginatedProducts) 
+@router.get("", response_model=PaginatedProducts) 
 async def get_products(
     query: ProductQueryParams = Depends(),
     db: Session = Depends(get_db),
@@ -43,7 +43,7 @@ async def get_product_detail(
 # --------------------------------------------------------------------
 # 3.  建立商品  -------------------------------------------------------
 # --------------------------------------------------------------------
-@router.post("/", response_model=ProductInDB, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ProductInDB, status_code=status.HTTP_201_CREATED)
 async def create_new_product(
     data: ProductCreate,
     db: Session = Depends(get_db),

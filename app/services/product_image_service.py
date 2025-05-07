@@ -12,6 +12,7 @@ from app.schemas.product_image import (
     ProductImageBase,
 )
 from app.services.image_service.base_image_service import get_image_service
+
 # ------------------------------------------------------
 # 💾 A1 - 儲存圖片編輯變更（新增 / 更新 / 刪除）
 # ------------------------------------------------------
@@ -87,9 +88,12 @@ async def process_product_images(
                 continue
 
             # ✅ 成功的圖片組回傳物件 
-            image_info = ProcessedImageInfo.model_validate(image, from_attributes=True)
+            image_info = ProcessedImageInfo.model_validate(image, from_attributes=True) 
             image_info.url = image_service.get_image_url(product, image.file_name)
+            if temp_id:
+                image_info.temp_id = temp_id  # ✅ 加上前端帶入的 temp_id
             results.append(image_info)
+
 
         except Exception as e:
             error[temp_id or image_id] = str(e)

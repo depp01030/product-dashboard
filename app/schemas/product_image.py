@@ -30,6 +30,7 @@ class ProductImageCreate(BaseModel):
 
 class ProcessedImageInfo(ProductImageBase):
     id: int                                     # 資料庫內部 ID
+    temp_id: Optional[str] = None               # 前端臨時 UUID，僅新圖使用
     url: Optional[str] = None                   # 公開預覽網址（或 objectURL）
 
     created_at: Optional[datetime] = None       # 建立時間

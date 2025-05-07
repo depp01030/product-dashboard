@@ -6,7 +6,10 @@ from app.utils.config import DATABASE_URL
 
 
 # 建立資料庫引擎與 Session
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"connect_timeout": 5},  # ⏰ 加上 timeout)
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # 宣告 ORM 基礎類別，供 models 繼承

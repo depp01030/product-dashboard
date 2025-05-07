@@ -4,8 +4,7 @@ from urllib.parse import quote
 from pathlib import Path
 from typing import List, Optional
 from PIL import Image
-import io
-from app.utils.config import get_candidates_root, get_products_root
+import io 
 from app.models.product import Product
 from app.utils.config import CANDIDATES_ROOT, PRODUCTS_ROOT 
  
@@ -124,7 +123,7 @@ def get_product_images(product: Product) -> List[str]:
     """
     傳回指定 product 對應的所有圖片絕對路徑
     """
-    root = Path(get_products_root())
+    root = Path(PRODUCTS_ROOT)
     folder = root / product.image_dir
 
     if not folder.exists() or not folder.is_dir():
