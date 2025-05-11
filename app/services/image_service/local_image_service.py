@@ -41,6 +41,7 @@ class LocalImageService(BaseImageService):
 
         # 回傳相對於 base_dir 的路徑（例如 A001/001_涼感褲/main.jpg）
         rel_path = os.path.relpath(full_path, self.base_dir)
+        print(f"[LocalImageService] 儲存圖片：{rel_path}")
         return rel_path
 
     def delete_file(self, product: Product, file_name: str) -> bool:

@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from app.utils.config import PRODUCTS_ROOT, IMAGE_LOCAL_BASE_URL
+from app.utils.config import PRODUCTS_ROOT, IMAGE_ROUTE_PREFIX
 from app.utils.db import Base, engine
 
 from fastapi import FastAPI
@@ -38,7 +38,7 @@ app.add_middleware(
 # 指定根資料夾路徑（你自己改）
 from app.utils.config import PRODUCTS_ROOT  # 或直接寫 "./Candidates_root"
 
-app.mount(IMAGE_LOCAL_BASE_URL, StaticFiles(directory=PRODUCTS_ROOT), name="images")
+# app.mount(IMAGE_ROUTE_PREFIX, StaticFiles(directory=PRODUCTS_ROOT), name="images")
 
 # 依功能註冊 router
 app.include_router(health.router)

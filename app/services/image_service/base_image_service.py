@@ -37,11 +37,12 @@ class BaseImageService(Protocol):
 # Provider：讀取 .env 決定實例
 # -------------------------------
 def get_image_service() -> BaseImageService:
-    backend = IMAGE_STORAGE_BACKEND
-    if backend == "r2":
-        # from app.services.image_storage.r2_storage import R2ImageStorage
-        # return R2ImageStorage()
+    if IMAGE_STORAGE_BACKEND == "r2":
+        from app.services.image_service.r2_image_service import R2ImageService
+        return R2ImageService()
         return None
-    else:
+    elif IMAGE_STORAGE_BACKEND == "local": 
         from app.services.image_service.local_image_service import LocalImageService
         return LocalImageService()
+    else:
+        raise ValueError(f"Unsupported image storage backend: {IMAGE_STORAGE_BACKEND}")

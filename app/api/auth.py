@@ -6,7 +6,7 @@ import jwt
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 MOCK_USERS = {
-    "admin": {"password": "amy88954", "role": "admin"},
+    "admin": {"password": "admin", "role": "admin"},
     "viewer": {"password": "123456", "role": "viewer"},
 }
 
